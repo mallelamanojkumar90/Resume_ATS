@@ -1,13 +1,19 @@
 const OpenAI = require("openai");
 
-const apiKey = process.env.OPENAI_API_KEY;
-const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const provider = (process.env.LLM_PROVIDER || (process.env.GROQ_API_KEY ? "groq" : "openai")).toLowerCase();
+const apiKey = provider === "groq" ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+const baseURL =
+  provider === "groq"
+    ? process.env.GROQ_BASE_URL || "https://api.groq.com/openai/v1"
+    : process.env.OPENAI_BASE_URL;
+const model = process.env.LLM_MODEL || process.env.OPENAI_MODEL || "gpt-4o-mini";
 
-const client = apiKey ? new OpenAI({ apiKey }) : null;
+const client = apiKey ? new OpenAI({ apiKey, ...(baseURL ? { baseURL } : {}) }) : null;
+const keyName = provider === "groq" ? "GROQ_API_KEY" : "OPENAI_API_KEY";
 
 async function rewriteBullets(resumeText, targetRole) {
   if (!client) {
-    throw new Error("OPENAI_API_KEY is missing. Add it to your environment before using this endpoint.");
+    throw new Error(`${keyName} is missing. Add it to your environment before using this endpoint.`);
   }
 
   const prompt = [
@@ -33,7 +39,7 @@ async function rewriteBullets(resumeText, targetRole) {
 
 async function generateCoverLetter(resumeText, jobDescription, tone) {
   if (!client) {
-    throw new Error("OPENAI_API_KEY is missing. Add it to your environment before using this endpoint.");
+    throw new Error(`${keyName} is missing. Add it to your environment before using this endpoint.`);
   }
 
   const prompt = [

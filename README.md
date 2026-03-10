@@ -9,8 +9,8 @@ Production-ready project for ATS resume scoring, bullet rewriting, and cover let
 
 ## HTTP Endpoints
 - `POST /api/score` (does not require OpenAI)
-- `POST /api/rewrite-bullets` (requires `OPENAI_API_KEY`)
-- `POST /api/cover-letter` (requires `OPENAI_API_KEY`)
+- `POST /api/rewrite-bullets` (requires `GROQ_API_KEY` or `OPENAI_API_KEY`)
+- `POST /api/cover-letter` (requires `GROQ_API_KEY` or `OPENAI_API_KEY`)
 
 ## MCP Tools
 - `ats_score_resume`
@@ -25,7 +25,10 @@ copy .env.example .env
 
 Then set your key in `.env`:
 ```env
-OPENAI_API_KEY=your_key_here
+LLM_PROVIDER=groq
+GROQ_API_KEY=your_groq_key_here
+GROQ_BASE_URL=https://api.groq.com/openai/v1
+LLM_MODEL=llama-3.3-70b-versatile
 ```
 
 ## Run API
