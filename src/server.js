@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
 const { z } = require("zod");
 require("dotenv").config();
 
@@ -9,10 +11,13 @@ const { scoreResume } = require("./services/atsScorer");
 const { rewriteBullets, generateCoverLetter } = require("./services/openaiService");
 
 const app = express();
+const swaggerDocument = YAML.load("openapi.yaml");
+
 app.use(helmet());
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 app.use(morgan("dev"));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const scoreSchema = z.object({
   resume_text: z.string().min(80),
@@ -34,7 +39,8 @@ app.get("/", (_req, res) => {
   res.json({
     name: "Resume ATS API",
     version: "1.0.0",
-    endpoints: ["POST /api/score", "POST /api/rewrite-bullets", "POST /api/cover-letter"]
+    endpoints: ["POST /api/score", "POST /api/rewrite-bullets", "POST /api/cover-letter"],
+    docs: "/docs"
   });
 });
 

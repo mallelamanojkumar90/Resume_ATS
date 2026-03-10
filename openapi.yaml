@@ -1,0 +1,163 @@
+openapi: 3.0.3
+info:
+  title: Resume ATS API
+  version: 1.0.0
+  description: API for ATS resume scoring, bullet rewriting, and cover letter generation.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/score:
+    post:
+      summary: Score a resume against a job description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScoreRequest'
+      responses:
+        '200':
+          description: ATS scoring result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScoreResponse'
+        '400':
+          description: Invalid input
+  /api/rewrite-bullets:
+    post:
+      summary: Rewrite resume bullets for ATS optimization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RewriteRequest'
+      responses:
+        '200':
+          description: Rewritten bullets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rewritten_bullets:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        original:
+                          type: string
+                        improved:
+                          type: string
+                        why:
+                          type: string
+        '400':
+          description: Invalid input
+        '500':
+          description: OpenAI or server error
+  /api/cover-letter:
+    post:
+      summary: Generate a tailored cover letter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CoverLetterRequest'
+      responses:
+        '200':
+          description: Cover letter generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cover_letter:
+                    type: string
+        '400':
+          description: Invalid input
+        '500':
+          description: OpenAI or server error
+components:
+  schemas:
+    ScoreRequest:
+      type: object
+      required:
+        - resume_text
+        - job_description
+      properties:
+        resume_text:
+          type: string
+          minLength: 80
+        job_description:
+          type: string
+          minLength: 80
+    RewriteRequest:
+      type: object
+      required:
+        - resume_text
+        - target_role
+      properties:
+        resume_text:
+          type: string
+          minLength: 80
+        target_role:
+          type: string
+          minLength: 2
+    CoverLetterRequest:
+      type: object
+      required:
+        - resume_text
+        - job_description
+      properties:
+        resume_text:
+          type: string
+          minLength: 80
+        job_description:
+          type: string
+          minLength: 80
+        tone:
+          type: string
+          enum: [formal, confident, friendly]
+    ScoreResponse:
+      type: object
+      properties:
+        overall_score:
+          type: integer
+        keyword_match_percent:
+          type: integer
+        matched_keywords:
+          type: array
+          items:
+            type: string
+        missing_keywords:
+          type: array
+          items:
+            type: string
+        section_analysis:
+          type: object
+          properties:
+            score:
+              type: integer
+            present_sections:
+              type: array
+              items:
+                type: string
+            missingSections:
+              type: array
+              items:
+                type: string
+        formatting_flags:
+          type: array
+          items:
+            type: object
+            properties:
+              line:
+                type: integer
+              issue:
+                type: string
+        suggestions:
+          type: array
+          items:
+            type: string
